@@ -5,6 +5,7 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import dev.marcosfarias.pokedex.MainActivity
 import dev.marcosfarias.pokedex.R
@@ -19,8 +20,8 @@ class PokemonSearchScreenTest {
     val activityRule = ActivityScenarioRule(MainActivity::class.java)
 
     @Test
-    fun searchLabel_isDisplayed() {
-        onView(withText(R.string.main_search))
-            .check(matches(isDisplayed()))
+    fun homeScreen_displaysSearchEntryPoint() {
+        onView(withId(R.id.search_text)).check(matches(isDisplayed()))
+        onView(withText(R.string.main_search)).check(matches(isDisplayed()))
     }
 }
