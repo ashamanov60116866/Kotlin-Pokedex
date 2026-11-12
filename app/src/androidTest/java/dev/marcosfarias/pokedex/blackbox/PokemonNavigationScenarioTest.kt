@@ -1,5 +1,6 @@
 package dev.marcosfarias.pokedex.blackbox
 
+import android.content.Intent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
@@ -13,30 +14,29 @@ import org.junit.runner.RunWith
 class PokemonNavigationScenarioTest {
 
     @Test
-    fun appLaunchesAndHandlesBackNavigation() {
+    fun userCanOpenPokedexAndReturnToHome() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val device = UiDevice.getInstance(instrumentation)
         val packageName = instrumentation.targetContext.packageName
-
-        val intent = instrumentation.targetContext
-            .packageManager
+        val intent = instrumentation.targetContext.packageManager
             .getLaunchIntentForPackage(packageName)
 
-        requireNotNull(intent) { "Не найден launcher Activity" }
-
-        intent.addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        requireNotNull(intent) { "Launcher activity was not found" }
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
         instrumentation.targetContext.startActivity(intent)
 
+        assertTrue(device.wait(Until.hasObject(By.text("Pokedex")), 5_000))
+        device.findObject(By.text("Pokedex")).click()
+
         assertTrue(
-            "Главный экран не появился",
-            device.wait(Until.hasObject(By.pkg(packageName)), 5_000)
+            "Pokédex screen did not open",
+            device.wait(Until.hasObject(By.res(packageName, "recyclerView")), 5_000)
         )
 
         device.pressBack()
-        device.waitForIdle()
-
-        // После Back приложение может свернуться или остаться открытым.
-        // Проверяем, что тестовый процесс не завершился с исключением.
-        assertTrue("Тест должен завершиться корректно", true)
+        assertTrue(
+            "Back navigation did not return to home",
+            device.wait(Until.hasObject(By.text("Pokedex")), 5_000)
+        )
     }
 }
