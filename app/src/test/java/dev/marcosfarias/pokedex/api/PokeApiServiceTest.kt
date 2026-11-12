@@ -1,71 +1,50 @@
-
 package dev.marcosfarias.pokedex.api
 
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.mock.MockEngine
-import io.ktor.client.engine.mock.respond
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.headersOf
-import kotlinx.coroutines.runBlocking
+import dev.marcosfarias.pokedex.repository.PokemonService
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertFalse
 import org.junit.Test
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class PokeApiServiceTest {
 
-    private fun createClient(
-        status: HttpStatusCode,
-        body: String
-    ): HttpClient {
-        return HttpClient(
-            MockEngine {
-                respond(
-                    content = body,
-                    status = status,
-                    headers = headersOf(
-                        HttpHeaders.ContentType,
-                        "application/json"
-                    )
-                )
-            }
-        )
-    }
+    private fun createService(server: MockWebServer): PokemonService =
+        Retrofit.Builder()
+            .baseUrl(server.url("/"))
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(PokemonService::class.java)
 
     @Test
-    fun `evolution chain endpoint returns data`() = runBlocking {
-        val client = createClient(
-            HttpStatusCode.OK,
-            """{"id":1,"chain":{"species":{"name":"bulbasaur"}}}"""
-        )
+    fun getPokemonList_returnsNotFoundFor404() {
+        val server = MockWebServer()
+        server.enqueue(MockResponse().setResponseCode(404))
+        server.start()
 
         try {
-            val response =
-                client.get("https://test.local/evolution-chain/1")
-
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("bulbasaur"))
+            val response = createService(server).get().execute()
+            assertEquals(404, response.code())
+            assertFalse(response.isSuccessful)
         } finally {
-            client.close()
+            server.shutdown()
         }
     }
 
     @Test
-    fun `evolution chain endpoint handles not found`() = runBlocking {
-        val client = createClient(
-            HttpStatusCode.NotFound,
-            """{"detail":"Not found"}"""
-        )
+    fun getPokemonList_returnsServerErrorFor500() {
+        val server = MockWebServer()
+        server.enqueue(MockResponse().setResponseCode(500))
+        server.start()
 
         try {
-            val response =
-                client.get("https://test.local/evolution-chain/999999")
-
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = createService(server).get().execute()
+            assertEquals(500, response.code())
+            assertFalse(response.isSuccessful)
         } finally {
-            client.close()
+            server.shutdown()
         }
     }
 }
