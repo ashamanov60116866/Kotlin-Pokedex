@@ -3,6 +3,7 @@ package dev.marcosfarias.pokedex.ui
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
@@ -20,8 +21,11 @@ class PokemonSearchScreenTest {
     val activityRule = ActivityScenarioRule(MainActivity::class.java)
 
     @Test
-    fun homeScreen_displaysSearchEntryPoint() {
-        onView(withId(R.id.search_text)).check(matches(isDisplayed()))
+    fun pokedexSearchAction_opensSearchBottomSheet() {
+        onView(withText("Pokedex")).perform(click())
+        onView(withId(R.id.speedDial)).perform(click())
+        onView(withText("Search")).perform(click())
+
         onView(withText(R.string.main_search)).check(matches(isDisplayed()))
     }
 }
