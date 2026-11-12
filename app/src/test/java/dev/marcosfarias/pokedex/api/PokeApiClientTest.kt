@@ -1,109 +1,46 @@
-
 package dev.marcosfarias.pokedex.api
 
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.mock.MockEngine
-import io.ktor.client.engine.mock.respond
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.headersOf
-import kotlinx.coroutines.runBlocking
+import dev.marcosfarias.pokedex.model.Pokemon
+import dev.marcosfarias.pokedex.repository.PokemonService
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNotNull
 import org.junit.Test
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class PokeApiClientTest {
 
-    private fun createClient(
-        status: HttpStatusCode,
-        body: String
-    ): HttpClient {
-        return HttpClient(
-            MockEngine {
-                respond(
-                    content = body,
-                    status = status,
-                    headers = headersOf(
-                        HttpHeaders.ContentType,
-                        "application/json"
-                    )
-                )
-            }
-        )
-    }
-
     @Test
-    fun `pokemon endpoint returns successful response`() = runBlocking {
-        val client = createClient(
-            HttpStatusCode.OK,
-            """{"name":"pikachu","id":25}"""
+    fun getPokemonList_requestsConfiguredEndpointAndParsesResponse() {
+        val server = MockWebServer()
+        server.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody("""[{"id":"25","name":"pikachu"}]""")
         )
+        server.start()
 
         try {
-            val response =
-                client.get("https://test.local/pokemon/pikachu")
+            val service = Retrofit.Builder()
+                .baseUrl(server.url("/"))
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(PokemonService::class.java)
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("pikachu"))
+            val response = service.get().execute()
+
+            assertEquals(200, response.code())
+            assertNotNull(response.body())
+            assertEquals("pikachu", response.body()?.first()?.name)
+
+            val request = server.takeRequest()
+            assertEquals("GET", request.method)
+            assertEquals("/pokemon.json", request.path)
         } finally {
-            client.close()
-        }
-    }
-
-    @Test
-    fun `pokemon endpoint handles not found`() = runBlocking {
-        val client = createClient(
-            HttpStatusCode.NotFound,
-            """{"detail":"Not found"}"""
-        )
-
-        try {
-            val response =
-                client.get("https://test.local/pokemon/unknown")
-
-            assertEquals(HttpStatusCode.NotFound, response.status)
-        } finally {
-            client.close()
-        }
-    }
-
-    @Test
-    fun `species endpoint returns successful response`() = runBlocking {
-        val client = createClient(
-            HttpStatusCode.OK,
-            """{"name":"pikachu","is_legendary":false}"""
-        )
-
-        try {
-            val response =
-                client.get("https://test.local/pokemon-species/pikachu")
-
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("pikachu"))
-        } finally {
-            client.close()
-        }
-    }
-
-    @Test
-    fun `species endpoint handles server error`() = runBlocking {
-        val client = createClient(
-            HttpStatusCode.InternalServerError,
-            """{"error":"server error"}"""
-        )
-
-        try {
-            val response =
-                client.get("https://test.local/pokemon-species/pikachu")
-
-            assertEquals(
-                HttpStatusCode.InternalServerError,
-                response.status
-            )
-        } finally {
-            client.close()
+            server.shutdown()
         }
     }
 }
