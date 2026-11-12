@@ -14,7 +14,7 @@ import org.junit.runner.RunWith
 class PokemonSearchScenarioTest {
 
     @Test
-    fun homeScreenShowsSearchPrompt() {
+    fun userCanOpenSearchBottomSheetFromPokedex() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val device = UiDevice.getInstance(instrumentation)
         val packageName = instrumentation.targetContext.packageName
@@ -25,11 +25,26 @@ class PokemonSearchScenarioTest {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
         instrumentation.targetContext.startActivity(intent)
 
+        assertTrue(device.wait(Until.hasObject(By.text("Pokedex")), 5_000))
+        device.findObject(By.text("Pokedex")).click()
+
         assertTrue(
-            "Search prompt is not visible on the home screen",
+            "Pokédex screen did not open",
+            device.wait(Until.hasObject(By.res(packageName, "speedDial")), 5_000)
+        )
+        device.findObject(By.res(packageName, "speedDial")).click()
+
+        assertTrue(
+            "Search action was not shown",
+            device.wait(Until.hasObject(By.text("Search")), 3_000)
+        )
+        device.findObject(By.text("Search")).click()
+
+        assertTrue(
+            "Search bottom sheet did not open",
             device.wait(
                 Until.hasObject(By.textContains("Search Pokemon")),
-                5_000
+                3_000
             )
         )
     }
