@@ -10,14 +10,12 @@ import dev.marcosfarias.pokedex.model.Pokemon
 import dev.marcosfarias.pokedex.repository.PokemonService
 import io.mockk.every
 import io.mockk.mockk
-import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
-import org.koin.dsl.single
 import retrofit2.Call
 import retrofit2.Callback
 import java.io.IOException
