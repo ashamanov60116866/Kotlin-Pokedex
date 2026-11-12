@@ -1,5 +1,6 @@
 package dev.marcosfarias.pokedex.blackbox
 
+import android.content.Intent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
@@ -13,43 +14,25 @@ import org.junit.runner.RunWith
 class PokemonErrorScenarioTest {
 
     @Test
-    fun appRemainsRunningAfterInvalidSearchInput() {
+    fun appCanBeRelaunchedAfterLeavingHomeScreen() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val device = UiDevice.getInstance(instrumentation)
         val packageName = instrumentation.targetContext.packageName
-
-        val launchIntent = instrumentation.targetContext
-            .packageManager
+        val intent = instrumentation.targetContext.packageManager
             .getLaunchIntentForPackage(packageName)
 
-        requireNotNull(launchIntent) {
-            "Не найден экран запуска приложения"
-        }
+        requireNotNull(intent)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        instrumentation.targetContext.startActivity(intent)
 
-        launchIntent.addFlags(
-            android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
-        )
-        instrumentation.targetContext.startActivity(launchIntent)
+        assertTrue(device.wait(Until.hasObject(By.pkg(packageName)), 5_000))
+        device.pressBack()
+        device.waitForIdle()
 
+        instrumentation.targetContext.startActivity(intent)
         assertTrue(
-            "Приложение не запустилось",
-            device.wait(Until.hasObject(By.pkg(packageName)), 5_000)
-        )
-
-        // Если на стартовом экране есть поле ввода, проверяем
-        // реакцию на заведомо несуществующее имя.
-        val input = device.findObject(By.clazz("android.widget.EditText"))
-
-        if (input != null) {
-            input.click()
-            input.setText("pokemon_does_not_exist_12345")
-            device.pressEnter()
-            device.waitForIdle()
-        }
-
-        assertTrue(
-            "Приложение закрылось после некорректного ввода",
-            device.hasObject(By.pkg(packageName))
+            "Application did not recover after relaunch",
+            device.wait(Until.hasObject(By.text("Pokedex")), 5_000)
         )
     }
 }
