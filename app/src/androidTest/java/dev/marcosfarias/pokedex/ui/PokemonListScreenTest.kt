@@ -19,8 +19,8 @@ class PokemonListScreenTest {
     val activityRule = ActivityScenarioRule(MainActivity::class.java)
 
     @Test
-    fun pokemonListScreen_isDisplayed() {
-        onView(withId(R.id.recyclerView))
-            .check(matches(isDisplayed()))
+    fun homeScreen_showsMenuAndNewsLists() {
+        onView(withId(R.id.recyclerViewMenu)).check(matches(isDisplayed()))
+        onView(withId(R.id.recyclerViewNews)).check(matches(isDisplayed()))
     }
 }
