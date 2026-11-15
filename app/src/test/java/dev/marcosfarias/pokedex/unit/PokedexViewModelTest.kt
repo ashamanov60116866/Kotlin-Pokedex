@@ -1,5 +1,6 @@
 package dev.marcosfarias.pokedex.unit
 
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
 import dev.marcosfarias.pokedex.database.dao.PokemonDAO
 import dev.marcosfarias.pokedex.model.Pokemon
@@ -11,11 +12,14 @@ import io.mockk.mockk
 import io.mockk.Runs
 import io.mockk.slot
 import io.mockk.verify
+import io.qameta.allure.junit4.AllureRunner
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -23,7 +27,11 @@ import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
+@RunWith(AllureRunner::class)
 class PokedexViewModelTest {
+
+    @get:Rule
+    val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private lateinit var dao: PokemonDAO
     private lateinit var service: PokemonService
@@ -40,10 +48,11 @@ class PokedexViewModelTest {
         every { service.get() } returns call
         every { call.enqueue(capture(callbackSlot)) } just Runs
         every { dao.all() } returns MutableLiveData(emptyList())
+        every { dao.add(any()) } just Runs
     }
 
     @Test
-    fun `viewModel starts network request`() {
+    fun viewModel_initializationStartsNetworkRequest() {
         PokedexViewModel(dao, service)
 
         verify(exactly = 1) { service.get() }
@@ -51,10 +60,9 @@ class PokedexViewModelTest {
     }
 
     @Test
-    fun `getListPokemon returns dao live data`() {
+    fun getListPokemon_returnsDaoLiveData() {
         val expected = listOf(Pokemon(id = "25", name = "pikachu"))
-        val liveData = MutableLiveData(expected)
-        every { dao.all() } returns liveData
+        every { dao.all() } returns MutableLiveData(expected)
 
         val viewModel = PokedexViewModel(dao, service)
 
@@ -62,44 +70,34 @@ class PokedexViewModelTest {
     }
 
     @Test
-    fun `successful response saves pokemons to dao`() {
+    fun successfulResponse_savesPokemonAndDoesNotExposeError() {
         val expected = listOf(Pokemon(id = "25", name = "pikachu"))
         val saved = CountDownLatch(1)
-
         every { dao.add(expected) } answers {
             saved.countDown()
         }
 
-        PokedexViewModel(dao, service)
+        val viewModel = PokedexViewModel(dao, service)
+        callbackSlot.captured.onResponse(call, Response.success(expected))
 
-        callbackSlot.captured.onResponse(
-            call,
-            Response.success(expected)
-        )
-
-        assertEquals(
-            true,
-            saved.await(2, TimeUnit.SECONDS)
-        )
+        assertEquals(true, saved.await(2, TimeUnit.SECONDS))
+        assertEquals(false, viewModel.hasNetworkError.value)
         verify(exactly = 1) { dao.add(expected) }
     }
 
     @Test
-    fun `network failure does not save pokemons`() {
-        PokedexViewModel(dao, service)
+    fun networkFailure_exposesErrorAndDoesNotSavePokemon() {
+        val viewModel = PokedexViewModel(dao, service)
 
-        callbackSlot.captured.onFailure(
-            call,
-            IOException("Network error")
-        )
+        callbackSlot.captured.onFailure(call, IOException("Network error"))
 
+        assertEquals(true, viewModel.hasNetworkError.value)
         verify(exactly = 0) { dao.add(any()) }
     }
 
     @Test
-    fun `server error response does not save pokemons`() {
-        PokedexViewModel(dao, service)
-
+    fun serverErrorResponse_exposesErrorAndDoesNotSavePokemon() {
+        val viewModel = PokedexViewModel(dao, service)
         val errorBody = """{"error":"server error"}"""
             .toResponseBody("application/json".toMediaType())
 
@@ -108,6 +106,7 @@ class PokedexViewModelTest {
             Response.error<List<Pokemon>>(500, errorBody)
         )
 
+        assertEquals(true, viewModel.hasNetworkError.value)
         verify(exactly = 0) { dao.add(any()) }
     }
 }
