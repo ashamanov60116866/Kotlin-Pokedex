@@ -7,8 +7,10 @@ import dev.marcosfarias.pokedex.model.Pokemon
 import dev.marcosfarias.pokedex.repository.PokemonService
 import dev.marcosfarias.pokedex.ui.pokedex.PokedexViewModel
 import io.mockk.*
+import io.qameta.allure.kotlin.junit4.AllureRunner
 import org.junit.*
 
+@RunWith(AllureRunner::class)
 class PokedexViewModelTest {
 
     @get:Rule
