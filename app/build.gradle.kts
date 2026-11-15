@@ -120,7 +120,6 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation("androidx.test.espresso:espresso-contrib:3.5.1")
     androidTestImplementation("androidx.test.uiautomator:uiautomator:2.2.0")
-    androidTestImplementation("io.mockk:mockk-android:1.13.16")
     androidTestImplementation("androidx.navigation:navigation-testing:2.5.3")
     androidTestImplementation("io.qameta.allure:allure-kotlin-model:2.4.0")
     androidTestImplementation("io.qameta.allure:allure-kotlin-commons:2.4.0")
