@@ -1,3 +1,4 @@
+import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.testing.Test
 
