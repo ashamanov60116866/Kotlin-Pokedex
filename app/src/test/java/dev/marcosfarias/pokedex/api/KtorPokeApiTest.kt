@@ -3,7 +3,6 @@ package dev.marcosfarias.pokedex.api
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
-import io.ktor.client.request.HttpRequestData
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -23,7 +22,7 @@ class KtorPokeApiTest {
         status: HttpStatusCode,
         responseBody: String
     ): Pair<KtorPokeApi, HttpClient> {
-        val engine = MockEngine { request: HttpRequestData ->
+        val engine = MockEngine { request ->
             assertEquals(expectedPath, request.url.encodedPath)
             respond(
                 content = responseBody,
