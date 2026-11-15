@@ -34,8 +34,9 @@ class PokemonDetailsScenarioTest {
             device.wait(Until.hasObject(By.res(packageName, "recyclerView")), 5_000)
         )
         val pokemonList = device.findObject(By.res(packageName, "recyclerView"))
-        assertTrue("Pokemon list is empty", pokemonList.childCount > 0)
-        pokemonList.getChild(0).click()
+        val pokemonCards = pokemonList.children
+        assertTrue("Pokemon list is empty", pokemonCards.isNotEmpty())
+        pokemonCards.first().click()
 
         assertTrue(
             "Pokemon details screen did not open",
