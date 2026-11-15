@@ -1,7 +1,7 @@
 package dev.marcosfarias.pokedex.blackbox
 
 import android.content.Intent
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.qameta.allure.android.runners.AllureAndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -20,7 +20,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import java.io.IOException
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(AllureAndroidJUnit4::class)
 class PokemonErrorScenarioTest {
 
     @Test
