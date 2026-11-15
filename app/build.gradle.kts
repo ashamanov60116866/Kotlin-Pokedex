@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.testing.Test
 
 plugins {
@@ -74,7 +75,7 @@ allure {
     version.set("2.32.0")
     report {
         reportDir.set(layout.projectDirectory.dir("../reports/allure-report"))
-        dependsOnTests.set(true)
+        dependsOnTests.set(false)
     }
 }
 
@@ -128,7 +129,7 @@ dependencies {
     androidTestUtil("androidx.test:orchestrator:1.5.1")
     debugImplementation("androidx.fragment:fragment-testing:1.5.5")
 
-    allureReport(files("$rootDir/reports/allure-results"))
+    allureReport(files("$rootDir/reports/allure-results/merged"))
 }
 
 tasks.register<JacocoReport>("jacocoTestReport") {
@@ -158,4 +159,14 @@ tasks.withType<Test>().configureEach {
         "allure.results.directory",
         rootProject.file("reports/allure-results/unit").absolutePath
     )
+}
+
+tasks.register<Sync>("mergeAllureResults") {
+    from("$rootDir/reports/allure-results/unit")
+    from("$rootDir/reports/allure-results/androidTest")
+    into("$rootDir/reports/allure-results/merged")
+}
+
+tasks.named("allureReport") {
+    dependsOn("mergeAllureResults")
 }
