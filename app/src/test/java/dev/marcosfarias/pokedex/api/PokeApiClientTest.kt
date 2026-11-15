@@ -6,10 +6,13 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import io.qameta.allure.kotlin.junit4.AllureRunner
 import org.junit.Test
+import org.junit.runner.RunWith
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+@RunWith(AllureRunner::class)
 class PokeApiClientTest {
 
     @Test
