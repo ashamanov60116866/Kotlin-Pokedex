@@ -80,6 +80,18 @@
         app:sdMainFabClosedSrc="@drawable/filter" />
 
 
+    <TextView
+        android:id="@+id/networkError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:padding="24dp"
+        android:text="@string/network_error"
+        android:textColor="@color/red"
+        android:textSize="16sp"
+        android:visibility="gone" />
+
     <ProgressBar
         android:layout_gravity="center"
         android:id="@+id/progressBar"
