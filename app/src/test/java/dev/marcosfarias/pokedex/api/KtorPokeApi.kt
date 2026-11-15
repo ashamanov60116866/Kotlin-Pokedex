@@ -10,7 +10,7 @@ import io.ktor.client.statement.HttpResponse
  */
 internal class KtorPokeApi(
     private val client: HttpClient,
-    private val baseUrl: String = "https://pokeapi.co/api/v2/"
+    private val baseUrl: String = "https://pokeapi.co/api/v2"
 ) {
     suspend fun pokemon(idOrName: String): HttpResponse =
         client.get("$baseUrl/pokemon/$idOrName")
