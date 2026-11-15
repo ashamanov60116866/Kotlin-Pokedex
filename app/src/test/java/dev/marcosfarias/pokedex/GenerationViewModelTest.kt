@@ -5,8 +5,10 @@ import dev.marcosfarias.pokedex.model.Generation
 import dev.marcosfarias.pokedex.ui.generation.GenerationViewModel
 import io.mockk.spyk
 import io.mockk.unmockkAll
+import io.qameta.allure.kotlin.junit4.AllureRunner
 import org.junit.*
 
+@RunWith(AllureRunner::class)
 class GenerationViewModelTest {
 
     @get:Rule
