@@ -1,6 +1,6 @@
 package dev.marcosfarias.pokedex.ui
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.qameta.allure.android.runners.AllureAndroidJUnit4
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -16,7 +16,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(AllureAndroidJUnit4::class)
 class PokemonDetailsScreenTest {
 
     @get:Rule
