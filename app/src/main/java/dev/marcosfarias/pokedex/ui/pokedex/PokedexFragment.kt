@@ -79,6 +79,13 @@ class PokedexFragment : Fragment() {
             }
         })
 
+        pokedexViewModel.hasNetworkError.observe(viewLifecycleOwner) { hasError ->
+            viewBinding?.networkError?.visibility = if (hasError) View.VISIBLE else View.GONE
+            if (hasError) {
+                viewBinding?.progressBar?.visibility = View.GONE
+            }
+        }
+
         val speedDialView = viewBinding?.speedDial
         speedDialView?.inflate(R.menu.menu_pokedex)
         speedDialView?.setOnActionSelectedListener(SpeedDialView.OnActionSelectedListener { actionItem ->
