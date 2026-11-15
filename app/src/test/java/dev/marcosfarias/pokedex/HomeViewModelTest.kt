@@ -4,8 +4,10 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import dev.marcosfarias.pokedex.model.Menu
 import dev.marcosfarias.pokedex.ui.home.HomeViewModel
 import io.mockk.unmockkAll
+import io.qameta.allure.kotlin.junit4.AllureRunner
 import org.junit.*
 
+@RunWith(AllureRunner::class)
 class HomeViewModelTest {
 
     @get:Rule
