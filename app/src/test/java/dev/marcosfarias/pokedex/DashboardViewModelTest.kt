@@ -7,8 +7,10 @@ import dev.marcosfarias.pokedex.database.dao.PokemonDAO
 import dev.marcosfarias.pokedex.model.Pokemon
 import dev.marcosfarias.pokedex.ui.dashboard.DashboardViewModel
 import io.mockk.*
+import io.qameta.allure.kotlin.junit4.AllureRunner
 import org.junit.*
 
+@RunWith(AllureRunner::class)
 class DashboardViewModelTest {
 
     @get:Rule
