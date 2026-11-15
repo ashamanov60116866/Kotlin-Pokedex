@@ -4,6 +4,8 @@ plugins {
     id("kotlin-parcelize")
     id("kotlin-kapt")
     id("androidx.navigation.safeargs.kotlin")
+    id("jacoco")
+    id("io.qameta.allure-report") version "2.12.0"
 }
 
 apply(from = "../ktlint.gradle.kts")
@@ -18,10 +20,14 @@ android {
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "io.qameta.allure.android.runners.AllureAndroidJUnitRunner"
     }
 
     buildTypes {
+        getByName("debug") {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
         getByName("release") {
             isMinifyEnabled = false
             proguardFiles(
@@ -44,6 +50,10 @@ android {
         viewBinding = true
     }
 
+    testOptions {
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
+    }
+
     packaging {
         resources {
             excludes += setOf(
@@ -51,6 +61,18 @@ android {
                 "META-INF/LICENSE-notice.md"
             )
         }
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+allure {
+    version.set("2.32.0")
+    report {
+        reportDir.set(layout.projectDirectory.dir("../reports/allure-report"))
+        dependsOnTests.set(true)
     }
 }
 
@@ -82,6 +104,12 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.16")
     testImplementation("androidx.arch.core:core-testing:2.2.0")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.11.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testImplementation("io.ktor:ktor-client-core:2.3.12")
+    testImplementation("io.ktor:ktor-client-mock:2.3.12")
+    testImplementation("io.qameta.allure:allure-kotlin-model:2.4.0")
+    testImplementation("io.qameta.allure:allure-kotlin-commons:2.4.0")
+    testImplementation("io.qameta.allure:allure-kotlin-junit4:2.4.0")
 
     androidTestImplementation("androidx.test:runner:1.5.2")
     androidTestImplementation("androidx.test:rules:1.5.0")
@@ -91,5 +119,40 @@ dependencies {
     androidTestImplementation("androidx.test.uiautomator:uiautomator:2.2.0")
     androidTestImplementation("io.mockk:mockk-android:1.13.16")
     androidTestImplementation("androidx.navigation:navigation-testing:2.5.3")
+    androidTestImplementation("io.qameta.allure:allure-kotlin-model:2.4.0")
+    androidTestImplementation("io.qameta.allure:allure-kotlin-commons:2.4.0")
+    androidTestImplementation("io.qameta.allure:allure-kotlin-junit4:2.4.0")
+    androidTestImplementation("io.qameta.allure:allure-kotlin-android:2.4.0")
+    androidTestUtil("androidx.test:orchestrator:1.5.1")
     debugImplementation("androidx.fragment:fragment-testing:1.5.5")
+
+    allureReport(files("$rootDir/reports/allure-results"))
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest")
+    reports {
+        xml.required.set(true)
+        csv.required.set(false)
+        html.required.set(true)
+        html.outputLocation.set(layout.projectDirectory.dir("../reports/coverage/html"))
+        xml.outputLocation.set(layout.projectDirectory.file("../reports/coverage/jacoco.xml"))
+    }
+    val kotlinClasses = fileTree(layout.buildDirectory.dir("tmp/kotlin-classes/debug")) {
+        exclude("**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*")
+    }
+    val javaClasses = fileTree(layout.buildDirectory.dir("intermediates/javac/debug/compileDebugJavaWithJavac/classes")) {
+        exclude("**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*")
+    }
+    classDirectories.setFrom(files(kotlinClasses, javaClasses))
+    sourceDirectories.setFrom(files("src/main/java"))
+    executionData.setFrom(fileTree(layout.buildDirectory) {
+        include("jacoco/testDebugUnitTest.exec")
+    })
+}
+
+tasks.register<Copy>("collectUnitAllureResults") {
+    dependsOn("testDebugUnitTest")
+    from("$rootDir/reports/allure-results/unit")
+    into("$rootDir/reports/allure-results")
 }
