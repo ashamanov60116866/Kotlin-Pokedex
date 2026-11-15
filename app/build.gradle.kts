@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.Test
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -7,8 +9,6 @@ plugins {
     id("jacoco")
     id("io.qameta.allure-report") version "2.12.0"
 }
-
-import org.gradle.api.tasks.testing.Test
 
 apply(from = "../ktlint.gradle.kts")
 
