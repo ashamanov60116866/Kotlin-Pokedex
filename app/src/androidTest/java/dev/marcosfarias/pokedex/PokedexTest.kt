@@ -1,5 +1,8 @@
 package dev.marcosfarias.pokedex
 
+import io.qameta.allure.android.runners.AllureAndroidJUnit4
+import org.junit.runner.RunWith
+
 import android.content.res.Resources
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.Navigation
@@ -11,6 +14,7 @@ import dev.marcosfarias.pokedex.ui.pokedex.PokedexFragment
 import org.junit.Before
 import org.junit.Test
 
+@RunWith(AllureAndroidJUnit4::class)
 class PokedexTest : BaseRobot() {
 
     lateinit var navHost: TestNavHostController
