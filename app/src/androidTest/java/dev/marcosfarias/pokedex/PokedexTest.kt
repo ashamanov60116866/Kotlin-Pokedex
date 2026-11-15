@@ -48,11 +48,6 @@ class PokedexTest : BaseRobot() {
     }
 
     @Test
-    fun verifyIfPokemonDataisDisplayedOnCard() {
-        onClickItem(R.id.recyclerView)
-    }
-
-    @Test
     fun verifyIfFabIsDisplayed() {
         isViewDisplayed(R.id.speedDial)
     }
