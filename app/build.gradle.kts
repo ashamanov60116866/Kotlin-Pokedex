@@ -8,6 +8,8 @@ plugins {
     id("io.qameta.allure-report") version "2.12.0"
 }
 
+import org.gradle.api.tasks.testing.Test
+
 apply(from = "../ktlint.gradle.kts")
 
 android {
@@ -151,8 +153,9 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     })
 }
 
-tasks.register<Copy>("collectUnitAllureResults") {
-    dependsOn("testDebugUnitTest")
-    from("$rootDir/reports/allure-results/unit")
-    into("$rootDir/reports/allure-results")
+tasks.withType<Test>().configureEach {
+    systemProperty(
+        "allure.results.directory",
+        rootProject.file("reports/allure-results/unit").absolutePath
+    )
 }
