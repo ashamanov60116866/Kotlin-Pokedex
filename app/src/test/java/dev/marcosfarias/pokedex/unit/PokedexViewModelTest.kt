@@ -12,7 +12,7 @@ import io.mockk.mockk
 import io.mockk.Runs
 import io.mockk.slot
 import io.mockk.verify
-import io.qameta.allure.junit4.AllureRunner
+import io.qameta.allure.kotlin.junit4.AllureRunner
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
