@@ -5,7 +5,7 @@ import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.qameta.allure.android.runners.AllureAndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.marcosfarias.pokedex.robots.BaseRobot
 import dev.marcosfarias.pokedex.ui.home.HomeFragment
@@ -14,7 +14,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(AllureAndroidJUnit4::class)
 class HomeTest : BaseRobot() {
     lateinit var navHost: TestNavHostController
 

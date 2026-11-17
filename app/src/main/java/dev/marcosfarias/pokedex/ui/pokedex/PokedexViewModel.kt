@@ -1,5 +1,7 @@
 package dev.marcosfarias.pokedex.ui.pokedex
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import dev.marcosfarias.pokedex.database.dao.PokemonDAO
 import dev.marcosfarias.pokedex.model.Pokemon
@@ -14,27 +16,32 @@ class PokedexViewModel(
     private val pokemonService: PokemonService
 ) : ViewModel() {
 
+    private val _hasNetworkError = MutableLiveData(false)
+    val hasNetworkError: LiveData<Boolean> = _hasNetworkError
+
     init {
         initNetworkRequest()
     }
 
     private fun initNetworkRequest() {
-        val call = pokemonService.get()
-
-        call.enqueue(object : Callback<List<Pokemon>?> {
+        pokemonService.get().enqueue(object : Callback<List<Pokemon>> {
             override fun onResponse(
-                call: Call<List<Pokemon>?>?,
-                response: Response<List<Pokemon>?>?
+                call: Call<List<Pokemon>>,
+                response: Response<List<Pokemon>>
             ) {
-                response?.body()?.let { pokemons: List<Pokemon> ->
-                    thread {
+                val pokemons = response.body()
+                if (response.isSuccessful && pokemons != null) {
+                    _hasNetworkError.postValue(false)
+                    thread(name = "pokemon-database-write") {
                         pokemonDAO.add(pokemons)
                     }
+                } else {
+                    _hasNetworkError.postValue(true)
                 }
             }
 
-            override fun onFailure(call: Call<List<Pokemon>?>?, t: Throwable?) {
-                // TODO handle failure
+            override fun onFailure(call: Call<List<Pokemon>>, throwable: Throwable) {
+                _hasNetworkError.postValue(true)
             }
         })
     }
