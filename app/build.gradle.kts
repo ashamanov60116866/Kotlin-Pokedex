@@ -9,7 +9,6 @@ plugins {
     id("kotlin-kapt")
     id("androidx.navigation.safeargs.kotlin")
     id("jacoco")
-    id("io.qameta.allure-report") version "2.12.0"
 }
 
 apply(from = "../ktlint.gradle.kts")
@@ -72,14 +71,6 @@ jacoco {
     toolVersion = "0.8.12"
 }
 
-allure {
-    version.set("2.32.0")
-    report {
-        reportDir.set(layout.projectDirectory.dir("../reports/allure-report"))
-        dependsOnTests.set(false)
-    }
-}
-
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
@@ -128,8 +119,6 @@ dependencies {
     androidTestImplementation("io.qameta.allure:allure-kotlin-android:2.4.0")
     androidTestUtil("androidx.test:orchestrator:1.5.1")
     debugImplementation("androidx.fragment:fragment-testing:1.5.5")
-
-    allureReport(files("$rootDir/reports/allure-results/merged"))
 }
 
 tasks.register<JacocoReport>("jacocoTestReport") {
@@ -165,8 +154,4 @@ tasks.register<Sync>("mergeAllureResults") {
     from("$rootDir/reports/allure-results/unit")
     from("$rootDir/reports/allure-results/androidTest")
     into("$rootDir/reports/allure-results/merged")
-}
-
-tasks.named("allureReport") {
-    dependsOn("mergeAllureResults")
 }
