@@ -9,8 +9,10 @@ import dev.marcosfarias.pokedex.ui.pokedex.PokedexViewModel
 import io.mockk.*
 import io.qameta.allure.kotlin.junit4.AllureRunner
 import org.junit.*
+import org.junit.runner.RunWith
 
-@RunWith(AllureRunner::class)
+//@RunWith(AllureRunner::class)
+@RunWith(org.junit.runners.JUnit4::class)
 class PokedexViewModelTest {
 
     @get:Rule
@@ -27,23 +29,23 @@ class PokedexViewModelTest {
 
     @Test
     fun `GIVEN service WHEN call service THEN check if is called once at viewmodel initialization`() {
-        verify(exactly = 1) { service.get() }
+        verify(exactly = 1) {
+            service.get()
+        }
     }
 
     @Test
     fun `GIVEN mocked dao results WHEN get list of pokemons from view model THEN result as expected`() {
-        // GIVEN
         val expected = listOf(
             Pokemon().apply { name = "Psyduck" },
             Pokemon().apply { name = "Onyx" }
         )
+
         every { dao.all() } returns MutableLiveData(expected)
 
-        // WHEN
         val result = viewModel.getListPokemon()
 
-        // THEN
-        Assert.assertEquals(expected, result.value!!)
+        Assert.assertEquals(expected, result.value)
     }
 
     companion object {

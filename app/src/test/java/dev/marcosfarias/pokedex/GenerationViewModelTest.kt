@@ -7,6 +7,7 @@ import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.qameta.allure.kotlin.junit4.AllureRunner
 import org.junit.*
+import org.junit.runner.RunWith
 
 @RunWith(AllureRunner::class)
 class GenerationViewModelTest {
