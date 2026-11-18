@@ -1,7 +1,8 @@
+
 package dev.marcosfarias.pokedex.blackbox
 
 import android.content.Intent
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.os.SystemClock
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -20,27 +21,60 @@ class PokemonDetailsScenarioTest {
         val device = UiDevice.getInstance(instrumentation)
         val context = instrumentation.targetContext
         val packageName = context.packageName
-        val intent = context.packageManager.getLaunchIntentForPackage(packageName)
 
-        requireNotNull(intent)
+        val intent = context.packageManager.getLaunchIntentForPackage(packageName)
+        requireNotNull(intent) { "Launcher activity was not found" }
+
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
         context.startActivity(intent)
 
-        assertTrue(device.wait(Until.hasObject(By.text("Pokedex")), 5_000))
+        assertTrue(
+            "Pokedex button did not appear",
+            device.wait(Until.hasObject(By.text("Pokedex")), 10_000)
+        )
+
         device.findObject(By.text("Pokedex")).click()
 
         assertTrue(
             "Pokemon list did not open",
-            device.wait(Until.hasObject(By.res(packageName, "recyclerView")), 5_000)
+            device.wait(
+                Until.hasObject(By.res(packageName, "recyclerView")),
+                10_000
+            )
         )
-        val pokemonList = device.findObject(By.res(packageName, "recyclerView"))
-        val pokemonCards = pokemonList.children
-        assertTrue("Pokemon list is empty", pokemonCards.isNotEmpty())
+
+        // RecyclerView appears before asynchronous API/Room loading finishes.
+        // Wait until at least one Pokemon card is actually displayed.
+        val deadline = SystemClock.uptimeMillis() + 30_000
+        var pokemonCards = emptyList<androidx.test.uiautomator.UiObject2>()
+
+        while (SystemClock.uptimeMillis() < deadline) {
+            val pokemonList =
+                device.findObject(By.res(packageName, "recyclerView"))
+
+            pokemonCards = pokemonList?.children ?: emptyList()
+
+            if (pokemonCards.isNotEmpty()) {
+                break
+            }
+
+            SystemClock.sleep(500)
+        }
+
+        assertTrue(
+            "Pokemon list is still empty after waiting 30 seconds. " +
+                "Check API availability and Room database population.",
+            pokemonCards.isNotEmpty()
+        )
+
         pokemonCards.first().click()
 
         assertTrue(
             "Pokemon details screen did not open",
-            device.wait(Until.hasObject(By.res(packageName, "textViewName")), 10_000)
+            device.wait(
+                Until.hasObject(By.res(packageName, "textViewName")),
+                10_000
+            )
         )
     }
 }

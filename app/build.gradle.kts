@@ -71,6 +71,12 @@ jacoco {
     toolVersion = "0.8.12"
 }
 
+configurations.configureEach {
+    resolutionStrategy.force(
+        "androidx.test:core:1.5.0"
+    )
+}
+
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
@@ -119,6 +125,8 @@ dependencies {
     androidTestImplementation("io.qameta.allure:allure-kotlin-android:2.4.0")
     androidTestUtil("androidx.test:orchestrator:1.5.1")
     debugImplementation("androidx.fragment:fragment-testing:1.5.5")
+    debugImplementation("androidx.test:monitor:1.6.1")
+    debugImplementation("androidx.test:core:1.5.0")
 }
 
 tasks.register<JacocoReport>("jacocoTestReport") {
@@ -144,9 +152,11 @@ tasks.register<JacocoReport>("jacocoTestReport") {
 }
 
 tasks.withType<Test>().configureEach {
+    val allureGroup = project.findProperty("allureGroup")?.toString() ?: "unit"
+
     systemProperty(
         "allure.results.directory",
-        rootProject.file("reports/allure-results/unit").absolutePath
+        rootProject.file("reports/allure-results/$allureGroup").absolutePath
     )
 }
 
